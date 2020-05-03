@@ -28,6 +28,7 @@ class hook_admin_siteWide_listOrders {
 <script>
 $(function() {
 $('.infoBoxContent:first a:first').attr('href','$link');
+$('a.btn-warning').attr('href','$link');
 });
 </script>
 EOD;

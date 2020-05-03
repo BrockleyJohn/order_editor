@@ -53,7 +53,7 @@ if (! function_exists('tep_cfg_pull_down_payment_methods')) {
       include($module_directory . $file);
 
       $class = substr($file, 0, strrpos($file, '.'));
-      if (tep_class_exists($class)) {
+      if (class_exists($class)) {
         $module = new $class;
         if ($module->check() > 0) {
           // If module enabled create array of titles
