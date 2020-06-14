@@ -30,7 +30,7 @@
         if (tep_db_num_rows($attributes_query)) {
           while ($attributes = tep_db_fetch_array($attributes_query)) {
             $option_id = sew_get_products_options_id($attributes['products_options']);
-            $value_id = sew_get_products_options_values_id($option_id,$attributes['products_options_values'],0,$orders_products['products_id']);
+            $value_id = sew_get_products_options_values_id($option_id,$attributes['products_options_values'],0,$products['products_id']);
             $att_array[$option_id] = $value_id;
 
             $subindex++;
@@ -43,8 +43,8 @@
         } else {
           $this->contents[$prod_id]['qty'] += $prod_array['qty'];
         }
-        $index++;
-/*      }
+/*        $index++;
+      }
     }
 
 

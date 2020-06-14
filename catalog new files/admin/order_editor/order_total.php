@@ -1,5 +1,11 @@
 <?php
 /*
+  v2.0 April 2020 (COVID-19 lockdown) - rewrite as extension to catalog class
+  @BrockleyJohn oscommerce@sewebsites.net
+  
+  *** You don't need to update this file in line with the catalog version
+  *** unless you change the constructor
+
   $Id: order_total.php,v 1.0 200/05/13 00:04:53 djmonkey1 Exp $
 
   osCommerce, Open Source E-Commerce Solutions
@@ -15,18 +21,21 @@
   
 */
 
-  class order_total {
-    var $modules;
+if (! class_exists('order_total')) {
+  // no class so no autoloader, include category class from old location
+  require_once(DIR_FS_CATALOG . 'includes/classes/order_total.php');
+}
 
-// class constructor
-    function order_total() {
+  class edit_order_total extends order_total {
+
+// override class constructor for different location
+    function __construct() {
       global $language;
 
       if (defined('MODULE_ORDER_TOTAL_INSTALLED') && tep_not_null(MODULE_ORDER_TOTAL_INSTALLED)) {
         $this->modules = explode(';', MODULE_ORDER_TOTAL_INSTALLED);
 
-        reset($this->modules);
-        while (list(, $value) = each($this->modules)) {
+        foreach($this->modules as $value) {
           include(DIR_FS_CATALOG_LANGUAGES . $language . '/modules/order_total/' . $value);
           include(DIR_FS_CATALOG_MODULES . 'order_total/' . $value);
 		  
@@ -36,50 +45,4 @@
       }
     }
 
-    function process() {
-      $order_total_array = array();
-      if (is_array($this->modules)) {
-        reset($this->modules);
-        while (list(, $value) = each($this->modules)) {
-          $class = substr($value, 0, strrpos($value, '.'));
-          if ($GLOBALS[$class]->enabled) {
-            $GLOBALS[$class]->process();
-
-            for ($i=0, $n=sizeof($GLOBALS[$class]->output); $i<$n; $i++) {
-              if (tep_not_null($GLOBALS[$class]->output[$i]['title']) && tep_not_null($GLOBALS[$class]->output[$i]['text'])) {
-                $order_total_array[] = array('code' => $GLOBALS[$class]->code,
-                                             'title' => $GLOBALS[$class]->output[$i]['title'],
-                                             'text' => $GLOBALS[$class]->output[$i]['text'],
-                                             'value' => $GLOBALS[$class]->output[$i]['value'],
-                                             'sort_order' => $GLOBALS[$class]->sort_order);
-              }
-            }
-          }
-        }
-      }
-
-      return $order_total_array;
-    }
-
-    function output() {
-      $output_string = '';
-      if (is_array($this->modules)) {
-        reset($this->modules);
-        while (list(, $value) = each($this->modules)) {
-          $class = substr($value, 0, strrpos($value, '.'));
-          if ($GLOBALS[$class]->enabled) {
-            $size = sizeof($GLOBALS[$class]->output);
-            for ($i=0; $i<$size; $i++) {
-              $output_string .= '              <tr>' . "\n" .
-                                '                <td align="right" class="main">' . $GLOBALS[$class]->output[$i]['title'] . '</td>' . "\n" .
-                                '                <td align="right" class="main">' . $GLOBALS[$class]->output[$i]['text'] . '</td>' . "\n" .
-                                '              </tr>';
-            }
-          }
-        }
-      }
-
-      return $output_string;
-    }
   }
-?>

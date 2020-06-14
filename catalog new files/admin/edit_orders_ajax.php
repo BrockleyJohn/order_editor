@@ -1,5 +1,6 @@
 <?php
   /*
+  v5.0.6 @BrockleyJohn 2020-04-23
   $Id: edit_orders_ajax.php v5.0.5 08/27/2007 djmonkey1 Exp $
 
   osCommerce, Open Source E-Commerce Solutions
@@ -13,9 +14,17 @@
   http://forums.oscommerce.com/index.php?showtopic=54032
   
   */
-  
+  $dbug = [];
+
   require('includes/application_top.php');
 	
+  //addon filename / php7.3 compatibility - edit if necessary
+  if (! defined('FILENAME_ORDERS_PACKINGSLIP')) define('FILENAME_ORDERS_PACKINGSLIP','FILENAME_ORDERS_PACKINGSLIP');
+  if (! defined('FILENAME_PDF_INVOICE')) define('FILENAME_PDF_INVOICE','FILENAME_PDF_INVOICE');
+  if (! defined('FILENAME_PDF_PACKINGSLIP')) define('FILENAME_PDF_PACKINGSLIP','FILENAME_PDF_PACKINGSLIP');
+  if (! defined('FILENAME_ORDERS_LABEL')) define('FILENAME_ORDERS_LABEL','FILENAME_ORDERS_LABEL');
+  if (! defined('FILENAME_GOOGLE_MAP')) define('FILENAME_GOOGLE_MAP','FILENAME_GOOGLE_MAP');
+  if (! defined('FILENAME_EMAIL_ORDER_TEXT')) define('FILENAME_EMAIL_ORDER_TEXT','FILENAME_EMAIL_ORDER_TEXT');
 	if (!defined('DIR_WS_INCLUDES')) define('DIR_WS_INCLUDES','includes/');
 	if (!defined('DIR_WS_IMAGES')) define('DIR_WS_IMAGES','images/');
 	if (!defined('DIR_WS_ICONS')) define('DIR_WS_ICONS',DIR_WS_IMAGES . 'icons/');
@@ -31,7 +40,7 @@
   include('order_editor/cart.php');
   include('order_editor/order.php');
   include('order_editor/shipping.php');
-  include('order_editor/http_client.php');
+//  include('order_editor/http_client.php');
   include(DIR_WS_LANGUAGES . $language. '/' . 'edit_orders.php');
 
    
@@ -250,8 +259,11 @@ if ($action == 'update_downloads') {
     if ($action == 'reload_totals') {
          
 	   $oID = $_POST['oID'];
-	   $shipping = array();
+
+      $shipping = array();
 	  
+      $shipping_id = 0;
+      
        if (is_array($_POST['update_totals'])) {
 	    foreach($_POST['update_totals'] as $total_index => $total_details) {
           extract($total_details, EXTR_PREFIX_ALL, "ot");
@@ -259,17 +271,23 @@ if ($action == 'update_downloads') {
             
 			$shipping['cost'] = $ot_value;
 			$shipping['title'] = $ot_title;
-			$shipping['id'] = $ot_id;
+			$shipping_id = $ot_id;
 
-           } // end if ($ot_class == "ot_shipping")
+            $debug[] = "shipping cost $ot_value";
+
+          } // end if ($ot_class == "ot_shipping")
          } //end foreach
 	   } //end if is_array
 	
-	  if (tep_not_null($shipping['id'])) {
+	  if ($shipping_id != 0) {
+        $shipping['id'] = $shipping_id;
     tep_db_query("UPDATE orders SET shipping_module = '" . (int)$shipping['id'] . "' WHERE orders_id = '" . tep_db_input($_POST['oID']) . "'");
-	   }
+      } else {
+        $shipping['id'] = $_POST['shipping'];
+      }
 	   
 		$order = new manualOrder($oID);
+      $dbug[] = 'order ' .print_r($order, true);
 		$order->adjust_zones();
 				
 		$cart = new manualCart();
@@ -280,17 +298,24 @@ if ($action == 'update_downloads') {
 		// Get the shipping quotes
         $shipping_modules = new shipping;
         $shipping_quotes = $shipping_modules->quote();
+      $dbug[] = 'quotes ' .print_r($shipping_quotes, true);
+      $dbug[] = 'globals ' .print_r($GLOBALS['shipping'], true);
 		
 		if (DISPLAY_PRICE_WITH_TAX == 'true') {//extract the base shipping cost or the ot_shipping module will add tax to it again
-		   $module = substr($GLOBALS['shipping']['id'], 0, strpos($GLOBALS['shipping']['id'], '_'));
-		   $tax = tep_get_tax_rate($GLOBALS[$module]->tax_class, $order->delivery['country']['id'], $order->delivery['zone_id']);
+		   $module = substr($shipping['id'], 0, strpos($shipping['id'], '_'));
+          $dbug[] = "module $module with tax class " . $GLOBALS[$module]->tax_class;
+           $dbug[] = "country is " . $order->delivery['country_id'];
+           $dbug[] = "zone is " . $order->delivery['zone_id'];
+		   $tax = tep_get_tax_rate($GLOBALS[$module]->tax_class, $order->delivery['country_id'], $order->delivery['zone_id']);
+           $debug[] = "tax is $tax";
 		   $order->info['total'] -= ( $order->info['shipping_cost'] - ($order->info['shipping_cost'] / (1 + ($tax /100))) );
            $order->info['shipping_cost'] = ($order->info['shipping_cost'] / (1 + ($tax /100)));
+            $dbug[] = "order shipping now " . $order->info['shipping_cost'];
 		   }
 
  		//this is where we call the order total modules
 		require( 'order_editor/order_total.php');
-		$order_total_modules = new order_total();
+		$order_total_modules = new edit_order_total();
         $order_totals = $order_total_modules->process();  
 
 	    $current_ot_totals_array = array();
@@ -430,8 +455,7 @@ if ($action == 'update_downloads') {
         $total_weight = $cart->show_weight();
 
 		
-  
-  ?>
+    ?>
   
 		<table width="100%">
 		 <tr><td>
@@ -518,6 +542,7 @@ if ($action == 'update_downloads') {
 <?php
     $r = 0;
     for ($i=0, $n=sizeof($shipping_quotes); $i<$n; $i++) {
+      if (array_key_exists('methods', $shipping_quotes[$i]) && is_array($shipping_quotes[$i]['methods'])) {
       for ($j=0, $n2=sizeof($shipping_quotes[$i]['methods']); $j<$n2; $j++) {
         $r++;
 		if (!isset($shipping_quotes[$i]['tax'])) $shipping_quotes[$i]['tax'] = 0;
@@ -538,6 +563,7 @@ if ($action == 'update_downloads') {
     
 	'        <td class="dataTableContent" align="right">' . $currencies->format(tep_add_tax($shipping_quotes[$i]['methods'][$j]['cost'], $shipping_quotes[$i]['tax']), true, $order->info['currency'], $order->info['currency_value']) . '</td>' . "\n" . 
              '                  </tr>';
+      }
       }
     }
 ?>
@@ -646,7 +672,7 @@ if ($action == 'update_downloads') {
 			  $email = STORE_NAME . "\n" .
 			           EMAIL_SEPARATOR . "\n" . 
 					   EMAIL_TEXT_ORDER_NUMBER . ' ' . $_GET['oID'] . "\n" . 
-                       EMAIL_TEXT_INVOICE_URL . ' ' . tep_catalog_href_link(FILENAME_CATALOG_ACCOUNT_HISTORY_INFO, 'order_id=' . (int)$oID, 'SSL') . "\n" . 
+                       EMAIL_TEXT_INVOICE_URL . ' ' . tep_catalog_href_link('account_history_info.php', 'order_id=' . (int)$oID, 'SSL') . "\n" . 
 					   EMAIL_TEXT_DATE_ORDERED . ' ' . tep_date_long($check_status['date_purchased']) . "\n\n" . sprintf(EMAIL_TEXT_STATUS_UPDATE, $orders_status_array[$status]) . $notify_comments . sprintf(EMAIL_TEXT_STATUS_UPDATE2);
 		   }
 	     } else {		// send standaard email if html email is not installed
@@ -655,7 +681,7 @@ if ($action == 'update_downloads') {
 	    	$email = STORE_NAME . "\n" .
 			           EMAIL_SEPARATOR . "\n" . 
 					   EMAIL_TEXT_ORDER_NUMBER . ' ' . $_GET['oID'] . "\n" . 
-                       EMAIL_TEXT_INVOICE_URL . ' ' . tep_catalog_href_link(FILENAME_CATALOG_ACCOUNT_HISTORY_INFO, 'order_id=' . (int)$oID, 'SSL') . "\n" . 
+                       EMAIL_TEXT_INVOICE_URL . ' ' . tep_catalog_href_link('account_history_info.php', 'order_id=' . (int)$oID, 'SSL') . "\n" . 
 					   EMAIL_TEXT_DATE_ORDERED . ' ' . tep_date_long($check_status['date_purchased']) . "\n\n" . sprintf(EMAIL_TEXT_STATUS_UPDATE, $orders_status_array[$status]) . $notify_comments . sprintf(EMAIL_TEXT_STATUS_UPDATE2);
 	     }		
 	
@@ -1038,7 +1064,7 @@ if (tep_db_num_rows($orders_history_query)) {
 			$Text_Delivery_Address .= $order->delivery['postcode'] . "\n" .	$order->delivery['country'] . "\n";
  		
 		$standaard_email = 'false' ;
-		if ( FILENAME_EMAIL_ORDER_TEXT !== FILENAME_EMAIL_ORDER_TEXT ) {	
+		if ( FILENAME_EMAIL_ORDER_TEXT !== 'FILENAME_EMAIL_ORDER_TEXT' ) {	
 			// only use if email order text is installed 
   		if (EMAIL_USE_HTML == 'true'){
   				$products_ordered .= $order_totals_table_end;
@@ -1053,7 +1079,7 @@ if (tep_db_num_rows($orders_history_query)) {
       $text = $werte["eorder_text_one"];
 			$text = preg_replace('/<-STORE_NAME->/', STORE_NAME, $text);
 			$text = preg_replace('/<-insert_id->/', $oID, $text);
-			$text = preg_replace('/<-INVOICE_URL->/', tep_href_link(FILENAME_ACCOUNT_HISTORY_INFO, 'order_id=' . $oID, 'SSL', false), $text);
+			$text = preg_replace('/<-INVOICE_URL->/', tep_href_link('account_history_info.php', 'order_id=' . $oID, 'SSL', false), $text);
 			$text = preg_replace('/<-DATE_ORDERED->/', tep_date_long( $order->info[ 'date_purchased' ] ), $text ) ;
 			if ($order->info['comments']) {
 				$text = preg_replace('/<-Customer_Comments->/', tep_db_output($order->info['comments']), $text);
@@ -1078,7 +1104,7 @@ if (tep_db_num_rows($orders_history_query)) {
 			}
 			elseif($order->content_type == 'virtual') {	
 					if ((DOWNLOAD_ENABLED == 'true') && isset($attributes_values['products_attributes_filename']) && tep_not_null($attributes_values['products_attributes_filename'])) {
-		  			$text = preg_replace('/<-DELIVERY_Adress->/', EMAIL_TEXT_DOWNLOAD_SHIPPING . "\n" . tep_href_link(FILENAME_ACCOUNT_HISTORY_INFO, 'order_id=' . $oID, 'SSL', false), $text);
+		  			$text = preg_replace('/<-DELIVERY_Adress->/', EMAIL_TEXT_DOWNLOAD_SHIPPING . "\n" . tep_href_link('account_history_info.php', 'order_id=' . $oID, 'SSL', false), $text);
 					} else{
 		  			$text = preg_replace('/<-DELIVERY_Adress->/', '', $text);
 					}	
@@ -1112,7 +1138,7 @@ if (tep_db_num_rows($orders_history_query)) {
 	  	$email_order = 	STORE_NAME . "\n" . 
       	             	EMAIL_SEPARATOR . "\n" . 
 											EMAIL_TEXT_ORDER_NUMBER . ' ' . (int)$oID . "\n" .
-  										EMAIL_TEXT_INVOICE_URL . ' ' . tep_catalog_href_link(FILENAME_CATALOG_ACCOUNT_HISTORY_INFO, 'order_id=' . (int)$oID, 'SSL') . "\n" .
+  										EMAIL_TEXT_INVOICE_URL . ' ' . tep_catalog_href_link('account_history_info.php', 'order_id=' . (int)$oID, 'SSL') . "\n" .
             	    	  EMAIL_TEXT_DATE_MODIFIED . ' ' . strftime(DATE_FORMAT_LONG) . "\n\n";
 
 	  	$email_order .= EMAIL_TEXT_PRODUCTS . "\n" . 
@@ -1210,4 +1236,12 @@ if (tep_db_num_rows($orders_history_query)) {
 	  </tr>
 	</table>
 	
-	<?php } //end if ($action == 'new_order_email')  ?>
+	<?php } //end if ($action == 'new_order_email') 
+if (count($dbug)) {
+  echo "<pre>\n";
+  foreach ($dbug as $line) {
+    echo "$line\n";
+  }
+  echo "</pre>\n";
+}
+?>

@@ -1,5 +1,6 @@
 <?php
 /*
+  v5.0.6 @BrockleyJohn 2020-04-23
   $Id: edit_orders.php v5.0.5 08/27/2007 djmonkey1 Exp $
 
   osCommerce, Open Source E-Commerce Solutions
@@ -24,6 +25,7 @@
   Many, many people have contributed to Order Editor in many, many ways.  Thanks go to all- it is truly a community project.  
   
 */
+  $dbug = [];
 
   require('includes/application_top.php');
   
@@ -33,10 +35,14 @@
   if (! defined('FILENAME_PDF_PACKINGSLIP')) define('FILENAME_PDF_PACKINGSLIP','FILENAME_PDF_PACKINGSLIP');
   if (! defined('FILENAME_ORDERS_LABEL')) define('FILENAME_ORDERS_LABEL','FILENAME_ORDERS_LABEL');
   if (! defined('FILENAME_GOOGLE_MAP')) define('FILENAME_GOOGLE_MAP','FILENAME_GOOGLE_MAP');
+	if (!defined('DIR_WS_INCLUDES')) define('DIR_WS_INCLUDES','includes/');
 	if (!defined('DIR_WS_IMAGES')) define('DIR_WS_IMAGES','images/');
 	if (!defined('DIR_WS_ICONS')) define('DIR_WS_ICONS',DIR_WS_IMAGES . 'icons/');
+	if (!defined('DIR_WS_MODULES')) define('DIR_WS_MODULES',DIR_WS_INCLUDES . 'modules/');
+	if (!defined('DIR_WS_CLASSES')) define('DIR_WS_CLASSES',DIR_WS_INCLUDES . 'classes/');
+	if (!defined('DIR_WS_LANGUAGES')) define('DIR_WS_LANGUAGES',DIR_WS_INCLUDES . 'languages/');
 
-  if (! defined('ORDER_EDITOR_PAYMENT_DROPDOWN')) { // if configs not installed
+  if (! defined('ORDER_EDITOR_USE_AJAX')) { // if configs not installed
     $db_query = tep_db_query('show columns from orders like "shipping_module"');
     if (!tep_db_num_rows($db_query)) {
       tep_db_query('alter table orders add column shipping_module varchar(11) null default null');
@@ -49,7 +55,7 @@
     tep_db_perform('configuration_group',$sql_data_array);
     $group_id = tep_db_insert_id();
   } else {
-    $query = tep_db_query('select configuration_group_id from configuration where configuration_key = "ORDER_EDITOR_PAYMENT_DROPDOWN"');
+    $query = tep_db_query('select configuration_group_id from configuration where configuration_key = "ORDER_EDITOR_USE_AJAX"');
     $row = tep_db_fetch_array($query);
     $group_id = $row['configuration_group_id'];
   }
@@ -97,6 +103,12 @@
                    'value' => 'true',
                    'sort' => 60,
                    'set_func' => 'tep_cfg_select_option(array(\'true\', \'false\'),'), 
+    'ORDER_EDITOR_EDIT_NEW_TAB' => array(
+                   'title' => 'Open in new tab',
+                   'desc' => 'Should Edit button on View Order open editor in a new tab?',
+                   'value' => 'true',
+                   'sort' => 70,
+                   'set_func' => 'tep_cfg_select_option(array(\'true\', \'false\'),'), 
     );
 
     $new_settings = false;
@@ -132,7 +144,7 @@
   include('order_editor/cart.php');
   include('order_editor/order.php');
   include('order_editor/shipping.php');
-  include('order_editor/http_client.php');
+//  include('order_editor/http_client.php');
 
    
   // Include currencies class
@@ -554,6 +566,8 @@ if ($status == GOOGLE_MAP_ORDER_STATUS )     // wenn "Versendet"
                $shipping['cost'] = $ot_value;
                $shipping['title'] = $ot_title;
                $shipping['id'] = $ot_id;
+            
+            $debug[] = "shipping cost $ot_value";
 			
 		  } // end if ($ot_class == "ot_shipping")
         } //end foreach
@@ -578,13 +592,15 @@ if ($status == GOOGLE_MAP_ORDER_STATUS )     // wenn "Versendet"
 		if (DISPLAY_PRICE_WITH_TAX == 'true') {//extract the base shipping cost or the ot_shipping module will add tax to it again
 		   $module = substr($GLOBALS['shipping']['id'], 0, strpos($GLOBALS['shipping']['id'], '_'));
 		   $tax = tep_get_tax_rate($GLOBALS[$module]->tax_class, $order->delivery['country']['id'], $order->delivery['zone_id']);
+           $debug[] = "tax is $tax";
 		   $order->info['total'] -= ( $order->info['shipping_cost'] - ($order->info['shipping_cost'] / (1 + ($tax /100))) );
            $order->info['shipping_cost'] = ($order->info['shipping_cost'] / (1 + ($tax /100)));
+            $debug[] = "order shipping now " . $order->info['shipping_cost'];
 		   }
 
 		//this is where we call the order total modules
 		require( 'order_editor/order_total.php');
-		$order_total_modules = new order_total();
+		$order_total_modules = new edit_order_total();
         $order_totals = $order_total_modules->process();  
 
         $current_ot_totals_array = array();
@@ -1047,6 +1063,7 @@ if ($status == GOOGLE_MAP_ORDER_STATUS )     // wenn "Versendet"
                               'text' => $currency['code'] . ' - ' . $currency['title']);
   }
   require('includes/template_top.php');
+
 ?>
  
   <?php include('order_editor/css.php');  
@@ -1061,6 +1078,15 @@ if ($status == GOOGLE_MAP_ORDER_STATUS )     // wenn "Versendet"
  
 </head>
 <body>
+<?php
+if (count($dbug)) {
+  echo "<pre>\n";
+  foreach ($dbug as $line) {
+    echo "$line\n";
+  }
+  echo "</pre>\n";
+}
+?>
 <div id="dhtmltooltip"></div>
 
 <script type="text/javascript">
@@ -1210,7 +1236,8 @@ document.onmousemove=positiontip
               <div class="update2">&nbsp;</div>
               <div class="update3">&nbsp;</div>
               <div class="update4" align="center"><?php echo ENTRY_SEND_NEW_ORDER_CONFIRMATION; ?>&nbsp;<?php echo tep_draw_checkbox_field('nC1', '', false); ?></div>
-              <div class="update5" align="center"><?php echo tep_image_submit('button_update.gif', IMAGE_UPDATE); ?></div>
+              <div class="update5" align="center"><?php echo 
+tep_draw_button('Update'); ?></div>
           </div>
 	
 	  <br>
@@ -1485,7 +1512,7 @@ document.onmousemove=positiontip
           include($module_directory . $file);
 
           $class = substr($file, 0, strrpos($file, '.'));
-          if (tep_class_exists($class)) {
+          if (class_exists($class)) {
              $module = new $class;
              if ($module->check() > 0) {
               // If module enabled create array of titles
@@ -1900,7 +1927,7 @@ document.onmousemove=positiontip
               <div class="update2">&nbsp;</div>
               <div class="update3">&nbsp;</div>
               <div class="update4" align="center"><?php echo ENTRY_SEND_NEW_ORDER_CONFIRMATION; ?>&nbsp;<?php echo tep_draw_checkbox_field('nC1', '', false); ?></div>
-              <div class="update5" align="center"><?php echo tep_image_submit('button_update.gif', IMAGE_UPDATE); ?></div>
+              <div class="update5" align="center"><?php echo tep_draw_button('Update'); ?></div>
            </div>
 		  
 	       <br>
@@ -2052,7 +2079,7 @@ document.onmousemove=positiontip
               <div class="update2">&nbsp;</div>
               <div class="update3">&nbsp;</div>
               <div class="update4" align="center"><?php echo ENTRY_SEND_NEW_ORDER_CONFIRMATION; ?>&nbsp;<?php echo tep_draw_checkbox_field('nC1', '', false); ?></div>
-              <div class="update5" align="center"><?php echo tep_image_submit('button_update.gif', IMAGE_UPDATE); ?></div>
+              <div class="update5" align="center"><?php echo tep_draw_button('Update'); ?></div>
           </div>
 		  
 	       <br>
