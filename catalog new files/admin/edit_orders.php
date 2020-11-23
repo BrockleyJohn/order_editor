@@ -41,6 +41,8 @@
 	if (!defined('DIR_WS_MODULES')) define('DIR_WS_MODULES',DIR_WS_INCLUDES . 'modules/');
 	if (!defined('DIR_WS_CLASSES')) define('DIR_WS_CLASSES',DIR_WS_INCLUDES . 'classes/');
 	if (!defined('DIR_WS_LANGUAGES')) define('DIR_WS_LANGUAGES',DIR_WS_INCLUDES . 'languages/');
+  if (!defined('DIR_FS_CATALOG_MODULES')) define('DIR_FS_CATALOG_MODULES', DIR_FS_CATALOG . 'includes/modules/');
+  if (!defined('DIR_FS_CATALOG_LANGUAGES')) define('DIR_FS_CATALOG_LANGUAGES', DIR_FS_CATALOG . 'includes/languages/');
 
   if (! defined('ORDER_EDITOR_USE_AJAX')) { // if configs not installed
     $db_query = tep_db_query('show columns from orders like "shipping_module"');
@@ -1172,8 +1174,8 @@ document.onmousemove=positiontip
 <!-- body //-->
 <table border="0" width="100%" cellspacing="2" cellpadding="2">
   <tr>
-    <td width="<?php echo BOX_WIDTH; ?>" valign="top">
-    <table border="0" width="<?php echo BOX_WIDTH; ?>" cellspacing="1" cellpadding="1" class="columnLeft">
+    <td width="100%" valign="top">
+    <table border="0" width="100%" cellspacing="1" cellpadding="1" class="columnLeft">
     </table>
     </td>
 <!-- body_text //-->
@@ -1260,18 +1262,22 @@ tep_draw_button('Update'); ?></div>
                 <td class="dataTableContent" valign="middle" align="right" nowrap><?php echo ENTRY_NAME; ?></td>
                 <td colspan="3" valign="top" class="dataTableContent"><input name="update_customer_name" size="37" value="<?php echo stripslashes($order->customer['name']); ?>" <?php if (ORDER_EDITOR_USE_AJAX == 'true') { ?>onChange="updateOrdersField('customers_name', encodeURIComponent(this.value))"<?php } ?>></td>
               </tr>
+              <?php if (defined('ENTRY_COMPANY')) { ?>
               <tr class="dataTableRow"> 
                 <td class="dataTableContent" valign="middle" align="right" nowrap><?php echo ENTRY_COMPANY; ?></td>
                 <td colspan="3" valign="top" class="dataTableContent"><input name="update_customer_company" size="37" value="<?php echo stripslashes($order->customer['company']); ?>" <?php if (ORDER_EDITOR_USE_AJAX == 'true') { ?>onChange="updateOrdersField('customers_company', encodeURIComponent(this.value))"<?php } ?>></td>
               </tr>
+              <?php } ?>
               <tr class="dataTableRow"> 
                 <td class="dataTableContent" valign="middle" align="right" nowrap><?php echo ENTRY_STREET_ADDRESS; ?></td>
                 <td colspan="3" valign="top" class="dataTableContent" nowrap><input name="update_customer_street_address" size="37" value="<?php echo stripslashes($order->customer['street_address']); ?>" <?php if (ORDER_EDITOR_USE_AJAX == 'true') { ?>onChange="updateOrdersField('customers_street_address', encodeURIComponent(this.value))"<?php } ?>></td>
               </tr>
+              <?php if (defined('ENTRY_SUBURB')) { ?>
               <tr class="dataTableRow"> 
                 <td class="dataTableContent" valign="middle" align="right"><?php echo ENTRY_SUBURB; ?></td>
                 <td colspan="3" valign="top" class="dataTableContent" nowrap><input name="update_customer_suburb" size="37" value="<?php echo stripslashes($order->customer['suburb']); ?>" <?php if (ORDER_EDITOR_USE_AJAX == 'true') { ?>onChange="updateOrdersField('customers_suburb', encodeURIComponent(this.value))"<?php } ?>></td>
               </tr>
+              <?php } ?>
               <tr class="dataTableRow"> 
                 <td class="dataTableContent" valign="middle" align="right" nowrap><?php echo ENTRY_CITY_STATE; ?></td>
                 <td colspan="2" valign="top" class="dataTableContent" nowrap><input name="update_customer_city" size="15" value="<?php echo stripslashes($order->customer['city']); ?>" <?php if (ORDER_EDITOR_USE_AJAX == 'true') { ?>onChange="updateOrdersField('customers_city', encodeURIComponent(this.value))"<?php } ?>>,</td>
@@ -1297,7 +1303,7 @@ tep_draw_button('Update'); ?></div>
                 <td colspan="4" style="border-top: 1px solid #C9C9C9;"><?php echo tep_draw_separator('pixel_trans.gif', '1', '1'); ?></td>
               </tr>
               <tr class="dataTableRow"> 
-                <td class="dataTableContent" valign="middle" align="right"><?php echo ENTRY_TELEPHONE_NUMBER; ?></td>
+                <td class="dataTableContent" valign="middle" align="right"><?php echo (defined('ENTRY_TELEPHONE_NUMBER') ? ENTRY_TELEPHONE_NUMBER : ENTRY_TELEPHONE); ?></td>
                 <td colspan="3" valign="top" class="dataTableContent"><input name="update_customer_telephone" size="15" value="<?php echo $order->customer['telephone']; ?>" <?php if (ORDER_EDITOR_USE_AJAX == 'true') { ?>onChange="updateOrdersField('customers_telephone', encodeURIComponent(this.value))"<?php } ?>></td>
               </tr>
               <tr class="dataTableRow"> 
@@ -1342,18 +1348,22 @@ tep_draw_button('Update'); ?></div>
                     <td class="dataTableContent" valign="middle" align="right"><?php echo ENTRY_NAME; ?></td>
                     <td colspan="3" valign="top" class="dataTableContent"><input name="update_delivery_name" size="37" value="<?php echo stripslashes($order->delivery['name']); ?>" <?php if (ORDER_EDITOR_USE_AJAX == 'true') { ?>onChange="updateOrdersField('delivery_name', encodeURIComponent(this.value))"<?php } ?>></td>
                   </tr>
+              <?php if (defined('ENTRY_COMPANY')) { ?>
                   <tr class="dataTableRow"> 
                     <td class="dataTableContent" valign="middle" align="right"><?php echo ENTRY_COMPANY; ?></td>
                     <td colspan="3" valign="top" class="dataTableContent"><input name="update_delivery_company" size="37" value="<?php echo stripslashes($order->delivery['company']); ?>" <?php if (ORDER_EDITOR_USE_AJAX == 'true') { ?>onChange="updateOrdersField('delivery_company', encodeURIComponent(this.value))"<?php } ?>></td>
                   </tr>
+              <?php } ?>
                   <tr class="dataTableRow"> 
                     <td class="dataTableContent" valign="middle" align="right"><?php echo ENTRY_STREET_ADDRESS; ?></td>
                     <td colspan="3" valign="top" class="dataTableContent"><input name="update_delivery_street_address" size="37" value="<?php echo stripslashes($order->delivery['street_address']); ?>" <?php if (ORDER_EDITOR_USE_AJAX == 'true') { ?>onChange="updateOrdersField('delivery_street_address', encodeURIComponent(this.value))"<?php } ?>></td>
                   </tr>
+              <?php if (defined('ENTRY_SUBURB')) { ?>
                   <tr class="dataTableRow"> 
                     <td class="dataTableContent" valign="middle" align="right"><?php echo ENTRY_SUBURB; ?></td>
                     <td colspan="3" valign="top" class="dataTableContent"><input name="update_delivery_suburb" size="37" value="<?php echo stripslashes($order->delivery['suburb']); ?>" <?php if (ORDER_EDITOR_USE_AJAX == 'true') { ?>onChange="updateOrdersField('delivery_suburb', encodeURIComponent(this.value))"<?php } ?>></td>
                   </tr>
+              <?php } ?>
                   <tr class="dataTableRow">
                     <td class="dataTableContent" valign="middle" align="right" nowrap><?php echo ENTRY_CITY_STATE; ?></td>
                     <td colspan="2" valign="top" class="dataTableContent" nowrap><input name="update_delivery_city" size="15" value="<?php echo stripslashes($order->delivery['city']); ?>" <?php if (ORDER_EDITOR_USE_AJAX == 'true') { ?>onChange="updateOrdersField('delivery_city', encodeURIComponent(this.value))"<?php } ?>>,</td>
@@ -1413,18 +1423,22 @@ tep_draw_button('Update'); ?></div>
                     <td class="dataTableContent" valign="middle" align="right" nowrap><?php echo ENTRY_NAME; ?></td>
                     <td colspan="3" valign="top" class="dataTableContent"><input name="update_billing_name" size="37" value="<?php echo stripslashes($order->billing['name']); ?>" <?php if (ORDER_EDITOR_USE_AJAX == 'true') { ?>onChange="updateOrdersField('billing_name', encodeURIComponent(this.value))"<?php } ?>></td>
                   </tr>
+              <?php if (defined('ENTRY_COMPANY')) { ?>
                   <tr class="dataTableRow"> 
                     <td class="dataTableContent" valign="middle" align="right" nowrap><?php echo ENTRY_COMPANY; ?></td>
                     <td colspan="3" valign="top" class="dataTableContent"><input name="update_billing_company" size="37" value="<?php echo stripslashes($order->billing['company']); ?>" <?php if (ORDER_EDITOR_USE_AJAX == 'true') { ?>onChange="updateOrdersField('billing_company', encodeURIComponent(this.value))"<?php } ?>></td>
                   </tr>
+              <?php } ?>
                   <tr class="dataTableRow"> 
                     <td class="dataTableContent" valign="middle" align="right" nowrap><?php echo ENTRY_STREET_ADDRESS; ?></td>
                     <td colspan="3" valign="top" class="dataTableContent"><input name="update_billing_street_address" size="37" value="<?php echo stripslashes($order->billing['street_address']); ?>" <?php if (ORDER_EDITOR_USE_AJAX == 'true') { ?>onChange="updateOrdersField('billing_street_address', encodeURIComponent(this.value))"<?php } ?>></td>
                   </tr>
+              <?php if (defined('ENTRY_SUBURB')) { ?>
                   <tr class="dataTableRow"> 
                     <td class="dataTableContent" valign="middle" align="right" nowrap><?php echo ENTRY_SUBURB; ?></td>
                     <td colspan="3" valign="top" class="dataTableContent"><input name="update_billing_suburb" size="37" value="<?php echo stripslashes($order->billing['suburb']); ?>" <?php if (ORDER_EDITOR_USE_AJAX == 'true') { ?>onChange="updateOrdersField('billing_suburb', encodeURIComponent(this.value))"<?php } ?>></td>
                   </tr>
+              <?php } ?>
                   <tr class="dataTableRow"> 
                     <td class="dataTableContent" valign="middle" align="right" nowrap><?php echo ENTRY_CITY_STATE; ?></td>
                     <td colspan="2" valign="top" class="dataTableContent" nowrap><input name="update_billing_city" size="15" value="<?php echo stripslashes($order->billing['city']); ?>" <?php if (ORDER_EDITOR_USE_AJAX == 'true') { ?>onChange="updateOrdersField('billing_city', encodeURIComponent(this.value))"<?php } ?>>,</td>
@@ -1504,6 +1518,7 @@ tep_draw_button('Update'); ?></div>
             $dir->close();
            }
 
+          $paymentMatchExists = 'false';
           // For each available payment module, check if enabled
           for ($i=0, $n=sizeof($directory_array); $i<$n; $i++) {
           $file = $directory_array[$i];

@@ -32,8 +32,8 @@
         }
 
         for ($i=0, $n=sizeof($include_modules); $i<$n; $i++) {
-          include(DIR_FS_CATALOG_LANGUAGES . $language . '/modules/shipping/' . $include_modules[$i]['file']);
-          include(DIR_FS_CATALOG_MODULES . 'shipping/' . $include_modules[$i]['file']);
+          include(DIR_FS_CATALOG . 'includes/languages/' . $language . '/modules/shipping/' . $include_modules[$i]['file']);
+          include(DIR_FS_CATALOG . 'includes/modules/' . 'shipping/' . $include_modules[$i]['file']);
 
           $GLOBALS[$include_modules[$i]['class']] = new $include_modules[$i]['class'];
         }

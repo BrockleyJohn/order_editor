@@ -54,7 +54,6 @@ define('ENTRY_TYPE_BELOW', 'Type below');
 //the definition of ENTRY_TAX is important when dealing with certain tax components and scenarios
 define('ENTRY_TAX', 'Tax');
 //do not use a colon (:) in the defintion, ie 'VAT' is ok, but 'VAT:' is not
-
 define('ENTRY_SHIPPING', 'Shipping:');
 define('ENTRY_TOTAL', 'Total:');
 define('ENTRY_STATUS', 'Status:');
