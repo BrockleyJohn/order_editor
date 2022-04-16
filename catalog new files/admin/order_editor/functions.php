@@ -281,7 +281,7 @@ if (! function_exists('sew_get_products_options_id')) {
     $options_name = tep_db_input($options_name);
  
     if ($language_id == 0) $language_id = $languages_id;
-    $product_options_query = tep_db_query("select products_options_id from " . TABLE_PRODUCTS_OPTIONS . " where products_options_name = '" . $options_name . "' and language_id = '" . (int)$language_id . "'");
+    $product_options_query = tep_db_query("select products_options_id from products_options where products_options_name = '" . $options_name . "' and language_id = '" . (int)$language_id . "'");
     $product_options = tep_db_fetch_array($product_options_query);
  
     return $product_options['products_options_id'];
@@ -296,9 +296,9 @@ if (! function_exists('sew_get_products_options_values_id')) {
  
     if ($language_id == 0) $language_id = $languages_id;
 	if (tep_not_null($products_id)) {
-		$product_options_values_query = tep_db_query("select pov.products_options_values_id from " . TABLE_PRODUCTS_OPTIONS_VALUES . " pov, " . TABLE_PRODUCTS_ATTRIBUTES . " pa where pa.options_id = '" . $options_id . "' and pov.products_options_values_name = '" . $options_value . "' and pov.language_id = '" . (int)$language_id . "' and pov.products_options_values_id = pa.options_values_id and pa.products_id = '" . (int)$products_id . "'");
+		$product_options_values_query = tep_db_query("select pov.products_options_values_id from " . 'products_options_values' . " pov, " . 'products_attributes' . " pa where pa.options_id = '" . $options_id . "' and pov.products_options_values_name = '" . $options_value . "' and pov.language_id = '" . (int)$language_id . "' and pov.products_options_values_id = pa.options_values_id and pa.products_id = '" . (int)$products_id . "'");
 	} else {
-		$product_options_values_query = tep_db_query("select pov.products_options_values_id from " . TABLE_PRODUCTS_OPTIONS_VALUES . " pov, " . TABLE_PRODUCTS_ATTRIBUTES . " pa where pa.options_id = '" . $options_id . "' and pov.products_options_values_name = '" . $options_value . "' and pov.language_id = '" . (int)$language_id . "' and pov.products_options_values_id = pa.options_values_id");
+		$product_options_values_query = tep_db_query("select pov.products_options_values_id from " . 'products_options_values' . " pov, " . 'products_attributes' . " pa where pa.options_id = '" . $options_id . "' and pov.products_options_values_name = '" . $options_value . "' and pov.language_id = '" . (int)$language_id . "' and pov.products_options_values_id = pa.options_values_id");
 	}
     $product_options_values = tep_db_fetch_array($product_options_values_query);
  
