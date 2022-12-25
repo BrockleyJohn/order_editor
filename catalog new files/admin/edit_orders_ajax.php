@@ -31,6 +31,8 @@
 	if (!defined('DIR_WS_MODULES')) define('DIR_WS_MODULES',DIR_WS_INCLUDES . 'modules/');
 	if (!defined('DIR_WS_CLASSES')) define('DIR_WS_CLASSES',DIR_WS_INCLUDES . 'classes/');
 	if (!defined('DIR_WS_LANGUAGES')) define('DIR_WS_LANGUAGES',DIR_WS_INCLUDES . 'languages/');
+  if (!defined('DIR_FS_CATALOG_LANGUAGES')) define('DIR_FS_CATALOG_LANGUAGES', DIR_FS_CATALOG . 'includes/languages/');
+  if (!defined('DIR_FS_CATALOG_MODULES')) define('DIR_FS_CATALOG_MODULES', DIR_FS_CATALOG . 'includes/modules/');
   
   // output a response header
   header('Content-type: text/html; charset=' . CHARSET . '');
@@ -45,7 +47,7 @@
 
    
   // Include currencies class
-  require(DIR_WS_CLASSES . 'currencies.php');
+  if (! class_exists('currencies')) require(DIR_WS_CLASSES . 'currencies.php');
   $currencies = new currencies();
   
   //$action 

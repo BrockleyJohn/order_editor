@@ -150,7 +150,7 @@
 
    
   // Include currencies class
-  require('includes/classes/currencies.php');
+  if (! class_exists('currencies')) require('includes/classes/currencies.php');
   $currencies = new currencies();
 
  
@@ -200,9 +200,9 @@
 		
         $sql_data_array = array(
 		'customers_name' => tep_db_input(tep_db_prepare_input($_POST['update_customer_name'])),
-        'customers_company' => tep_db_input(tep_db_prepare_input($_POST['update_customer_company'])),
+        'customers_company' => tep_db_input(tep_db_prepare_input($_POST['update_customer_company'] ?? '')),
         'customers_street_address' => tep_db_input(tep_db_prepare_input($_POST['update_customer_street_address'])),
-        'customers_suburb' => tep_db_input(tep_db_prepare_input($_POST['update_customer_suburb'])),
+        'customers_suburb' => tep_db_input(tep_db_prepare_input($_POST['update_customer_suburb'] ?? '')),
         'customers_city' => tep_db_input(tep_db_prepare_input($_POST['update_customer_city'])),
         'customers_state' => tep_db_input(tep_db_prepare_input($update_customer_state)),
         'customers_postcode' => tep_db_input(tep_db_prepare_input($_POST['update_customer_postcode'])),
@@ -211,9 +211,9 @@
         'customers_email_address' => tep_db_input(tep_db_prepare_input($_POST['update_customer_email_address'])),
                                 
 		'billing_name' => tep_db_input(tep_db_prepare_input(((isset($_POST['billing_same_as_customer']) && $_POST['billing_same_as_customer'] == 'on') ? $_POST['update_customer_name'] : $_POST['update_billing_name']))),
-        'billing_company' => tep_db_input(tep_db_prepare_input(((isset($_POST['billing_same_as_customer']) && $_POST['billing_same_as_customer'] == 'on') ? $_POST['update_customer_company'] : $_POST['update_billing_company']))),
+        'billing_company' => tep_db_input(tep_db_prepare_input(((isset($_POST['billing_same_as_customer']) && $_POST['billing_same_as_customer'] == 'on') ? ($_POST['update_customer_company'] ?? '') : ($_POST['update_billing_company'] ?? '')))),
         'billing_street_address' => tep_db_input(tep_db_prepare_input(((isset($_POST['billing_same_as_customer']) && $_POST['billing_same_as_customer'] == 'on') ? $_POST['update_customer_street_address'] : $_POST['update_billing_street_address']))),
-        'billing_suburb' => tep_db_input(tep_db_prepare_input(((isset($_POST['billing_same_as_customer']) && $_POST['billing_same_as_customer'] == 'on') ? $_POST['update_customer_suburb'] : $_POST['update_billing_suburb']))),
+        'billing_suburb' => tep_db_input(tep_db_prepare_input(((isset($_POST['billing_same_as_customer']) && $_POST['billing_same_as_customer'] == 'on') ? ($_POST['update_customer_suburb'] ?? '') : ($_POST['update_billing_suburb'] ?? '')))),
         'billing_city' => tep_db_input(tep_db_prepare_input(((isset($_POST['billing_same_as_customer']) && $_POST['billing_same_as_customer'] == 'on') ? $_POST['update_customer_city'] : $_POST['update_billing_city']))),
         'billing_state' => tep_db_input(tep_db_prepare_input(((isset($_POST['billing_same_as_customer']) && $_POST['billing_same_as_customer'] == 'on') ? $update_customer_state : $update_billing_state))),
         'billing_postcode' => tep_db_input(tep_db_prepare_input(((isset($_POST['billing_same_as_customer']) && $_POST['billing_same_as_customer'] == 'on') ? $_POST['update_customer_postcode'] : $_POST['update_billing_postcode']))),
@@ -221,9 +221,9 @@
 								
 								
 	'delivery_name' => tep_db_input(tep_db_prepare_input(((isset($_POST['shipping_same_as_billing']) && $_POST['shipping_same_as_billing'] == 'on') ? (($_POST['billing_same_as_customer'] == 'on') ? $_POST['update_customer_name'] : $_POST['update_billing_name']) : $_POST['update_delivery_name']))),
-    'delivery_company' => tep_db_input(tep_db_prepare_input(((isset($_POST['shipping_same_as_billing']) && $_POST['shipping_same_as_billing'] == 'on') ? (($_POST['billing_same_as_customer'] == 'on') ? $_POST['update_customer_company'] : $_POST['update_billing_company']) : $_POST['update_delivery_company']))),
+    'delivery_company' => tep_db_input(tep_db_prepare_input(((isset($_POST['shipping_same_as_billing']) && $_POST['shipping_same_as_billing'] == 'on') ? (($_POST['billing_same_as_customer'] == 'on') ? ($_POST['update_customer_company'] ?? '') : ($_POST['update_billing_company'] ?? '')) : ($_POST['update_delivery_company'] ?? '')))),
     'delivery_street_address' => tep_db_input(tep_db_prepare_input(((isset($_POST['shipping_same_as_billing']) && $_POST['shipping_same_as_billing'] == 'on') ? (($_POST['billing_same_as_customer'] == 'on') ? $_POST['update_customer_street_address'] : $_POST['update_billing_street_address']) : $_POST['update_delivery_street_address']))),
-    'delivery_suburb' => tep_db_input(tep_db_prepare_input(((isset($_POST['shipping_same_as_billing']) && $_POST['shipping_same_as_billing'] == 'on') ? (($_POST['billing_same_as_customer'] == 'on') ? $_POST['update_customer_suburb'] : $_POST['update_billing_suburb']) : $_POST['update_delivery_suburb']))),
+    'delivery_suburb' => tep_db_input(tep_db_prepare_input(((isset($_POST['shipping_same_as_billing']) && $_POST['shipping_same_as_billing'] == 'on') ? (($_POST['billing_same_as_customer'] == 'on') ? ($_POST['update_customer_suburb'] ?? '') : ($_POST['update_billing_suburb'] ?? '')) : ($_POST['update_delivery_suburb'] ?? '')))),
     'delivery_city' => tep_db_input(tep_db_prepare_input(((isset($_POST['shipping_same_as_billing']) && $_POST['shipping_same_as_billing'] == 'on') ? (($_POST['billing_same_as_customer'] == 'on') ? $_POST['update_customer_city'] : $_POST['update_billing_city']) : $_POST['update_delivery_city']))),
     'delivery_state' => tep_db_input(tep_db_prepare_input(((isset($_POST['shipping_same_as_billing']) && $_POST['shipping_same_as_billing'] == 'on') ? (($_POST['billing_same_as_customer'] == 'on') ? $update_customer_state : $update_billing_state) : $update_delivery_state))),
     'delivery_postcode' => tep_db_input(tep_db_prepare_input(((isset($_POST['shipping_same_as_billing']) && $_POST['shipping_same_as_billing'] == 'on') ? (($_POST['billing_same_as_customer'] == 'on') ? $_POST['update_customer_postcode'] : $_POST['update_billing_postcode']) : $_POST['update_delivery_postcode']))),
@@ -369,7 +369,7 @@ if ($status == GOOGLE_MAP_ORDER_STATUS )     // wenn "Versendet"
 
         if ($statuscode != 200)         //  errors occurred; the address was successfully parsedd.
         {
-                // Versuch ohne Straße
+                // Versuch ohne Straï¿½e
                 $url  = "http://maps.google.com/maps/geo?q=";
                 $url .= $order->delivery['postcode'] . "," . $order->delivery['city'] . "," . $order->delivery['country'];
                 $url .= "&output=csv&key=";
@@ -850,7 +850,7 @@ if ($status == GOOGLE_MAP_ORDER_STATUS )     // wenn "Versendet"
 			$Text_Delivery_Address .= $order->delivery['postcode'] . "\n" .	$order->delivery['country'] . "\n";
  		
 		$standaard_email = 'false' ;
-		if ( FILENAME_EMAIL_ORDER_TEXT !== ´FILENAME_EMAIL_ORDER_TEXT´ ){	
+		if ( FILENAME_EMAIL_ORDER_TEXT !== ï¿½FILENAME_EMAIL_ORDER_TEXTï¿½ ){	
 			// only use if email order text is installed 
   		if (EMAIL_USE_HTML == 'true'){
   				$products_ordered .= $order_totals_table_end;
@@ -958,8 +958,8 @@ if ($status == GOOGLE_MAP_ORDER_STATUS )     // wenn "Versendet"
 			$email_order .= EMAIL_TEXT_FOOTER . "\n\n";
 	  }
 
-    //code for plain text emails which changes the € sign to EUR, otherwise the email will show ? instead of €
-    $email_order = str_replace("€","EUR",$email_order);
+    //code for plain text emails which changes the ï¿½ sign to EUR, otherwise the email will show ? instead of ï¿½
+    $email_order = str_replace("ï¿½","EUR",$email_order);
 	  $email_order = str_replace("&nbsp;"," ",$email_order);
 
 	  //code which replaces the <br> tags within EMAIL_TEXT_PAYMENT_INFO and EMAIL_TEXT_FOOTER with the proper \n
@@ -1094,7 +1094,7 @@ if (count($dbug)) {
 <script type="text/javascript">
 
 /***********************************************
-* Cool DHTML tooltip script- © Dynamic Drive DHTML code library (www.dynamicdrive.com)
+* Cool DHTML tooltip script- ï¿½ Dynamic Drive DHTML code library (www.dynamicdrive.com)
 * This notice MUST stay intact for legal use
 * Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code
 ***********************************************/
@@ -1864,10 +1864,10 @@ tep_draw_button('Update'); ?></div>
 
        if (ORDER_EDITOR_USE_AJAX == 'true') {
 	  echo '                    <td align="right" class="dataTableContent"><input name="update_totals['.$i.'][title]" id="'.$id.'[title]" value="' . trim($order->totals[$i]['title']) . '" onChange="obtainTotals()"></td>' . "\n" .
-           '                    <td align="right" class="dataTableContent"><input name="update_totals['.$i.'][value]" id="'.$id.'[value]" value="' . @number_format($order->totals[$i]['value'], 2, '.', '') . '" size="6" onChange="obtainTotals()"><input name="update_totals['.$i.'][class]" type="hidden" value="' . $order->totals[$i]['class'] . '"><input name="update_totals['.$i.'][id]" type="hidden" value="' . $shipping_module_id . '" id="' . $id . '[id]"></td>' . "\n";
+           '                    <td align="right" class="dataTableContent"><input name="update_totals['.$i.'][value]" id="'.$id.'[value]" value="' . @number_format((float)$order->totals[$i]['value'], 2, '.', '') . '" size="6" onChange="obtainTotals()"><input name="update_totals['.$i.'][class]" type="hidden" value="' . $order->totals[$i]['class'] . '"><input name="update_totals['.$i.'][id]" type="hidden" value="' . $shipping_module_id . '" id="' . $id . '[id]"></td>' . "\n";
 		   } else {
 	  echo '                    <td align="right" class="dataTableContent"><input name="update_totals['.$i.'][title]" id="'.$id.'[title]" value="' . trim($order->totals[$i]['title']) . '"></td>' . "\n" .
-           '                    <td align="right" class="dataTableContent"><input name="update_totals['.$i.'][value]" id="'.$id.'[value]" value="' . @number_format($order->totals[$i]['value'], 2, '.', '') . '" size="6"><input name="update_totals['.$i.'][class]" type="hidden" value="' . $order->totals[$i]['class'] . '"><input name="update_totals['.$i.'][id]" type="hidden" value="' . $shipping_module_id . '" id="' . $id . '[id]"></td>' . "\n";
+           '                    <td align="right" class="dataTableContent"><input name="update_totals['.$i.'][value]" id="'.$id.'[value]" value="' . @number_format((float)$order->totals[$i]['value'], 2, '.', '') . '" size="6"><input name="update_totals['.$i.'][class]" type="hidden" value="' . $order->totals[$i]['class'] . '"><input name="update_totals['.$i.'][id]" type="hidden" value="' . $shipping_module_id . '" id="' . $id . '[id]"></td>' . "\n";
 		   }
 		   
       if ($order->info['currency'] != DEFAULT_CURRENCY) echo '                    <td align="right" class="dataTableContent" nowrap>' . $order->totals[$i]['text'] . '</td>' . "\n";

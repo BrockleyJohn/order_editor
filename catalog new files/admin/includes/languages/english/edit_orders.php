@@ -157,3 +157,6 @@ define('AJAX_INPUT_NEW_EMAIL_COMMENTS', 'Please input any comments you may have 
 define('AJAX_SUCCESS_EMAIL_SENT', 'Success!  A new order confirmation email was sent to %s');
 define('AJAX_WORKING', 'Working, please wait....');
 
+if (!defined('ICON_SUCCESS')) define('ICON_SUCCESS', 'Success');
+if (!defined('ICON_TICK')) define('ICON_TICK', 'OK');
+if (!defined('ENTRY_TELEPHONE')) define('ENTRY_TELEPHONE', 'Telephone');

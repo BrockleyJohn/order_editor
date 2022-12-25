@@ -27,7 +27,7 @@
   include(DIR_WS_LANGUAGES . $language. '/' . 'edit_orders.php');
 
   // Include currencies class
-  require(DIR_WS_CLASSES . 'currencies.php');
+  if (! class_exists('currencies')) require(DIR_WS_CLASSES . 'currencies.php');
   $currencies = new currencies();
 
   $oID = tep_db_prepare_input((int)$_GET['oID']);

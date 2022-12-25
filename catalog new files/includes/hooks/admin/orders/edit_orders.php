@@ -1,15 +1,13 @@
 <?php
 /*
-  $Id$
-
   add edit orders to admin / orders.php
 	
-	author: John Ferguson @BrockleyJohn john@sewebsites.net
+	author: John Ferguson @BrockleyJohn phoenix@sewebsites.net
 
-  osCommerce, Open Source E-Commerce Solutions
-  http://www.oscommerce.com
+  CE Phoenix, E-Commerce made Easy
+  https://phoenixcart.org
 
-  Copyright (c) 2018 osCommerce
+  Copyright (c) 2021 Phoenix Cart
 
   Released under the GNU General Public License
 */

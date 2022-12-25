@@ -164,4 +164,6 @@ define('AJAX_INPUT_NEW_EMAIL_COMMENTS', 'Bitte tragen Sie hier alle Ihre Anmerku
 define('AJAX_SUCCESS_EMAIL_SENT', 'Erfolg! Eine neue Bestellbestätigung wurde an %s verschickt');
 define('AJAX_WORKING', 'arbeite, bitte warten....');
 
-?>
+if (!defined('ICON_SUCCESS')) define('ICON_SUCCESS', 'Erfolg');
+if (!defined('ICON_TICK')) define('ICON_TICK', 'OK');
+if (!defined('ENTRY_TELEPHONE')) define('ENTRY_TELEPHONE', 'Telefon');

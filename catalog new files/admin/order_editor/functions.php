@@ -10,6 +10,11 @@
   Released under the GNU General Public License
 */
 
+  if(! function_exists('tep_get_uprid')) {
+    function tep_get_uprid($pid, $atts) {
+      return Product::build_uprid($pid, $atts);
+    }
+  }
 
   // Function to change quotes to HTML equivalents for form inputs
   function oe_html_quotes($string) {
